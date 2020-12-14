@@ -22,10 +22,10 @@
                     "interactions": ""
                 },
                 {
-                    "name": "Sprint",
-                    "type": "Button",
-                    "id": "e9419e8a-f1e8-4474-8061-ed6db0c53aa8",
-                    "expectedControlType": "Button",
+                    "name": "Rotate",
+                    "type": "PassThrough",
+                    "id": "641f6ef2-97f6-41dc-947e-2343ea04faaf",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": ""
                 }
@@ -98,15 +98,37 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "",
-                    "id": "e47e7f33-aefc-45a6-951d-13a6dc550ce8",
-                    "path": "",
+                    "name": "KeyBoard",
+                    "id": "207335c3-1a28-4c5f-a3e1-2ec748f7615c",
+                    "path": "2DVector",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Sprint",
-                    "isComposite": false,
+                    "action": "Rotate",
+                    "isComposite": true,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "left",
+                    "id": "c442a105-bc9b-4083-98dd-881ce54b7311",
+                    "path": "<Keyboard>/q",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
+                },
+                {
+                    "name": "right",
+                    "id": "a8b829b0-8bd8-4628-89a0-ab5cc1d83f91",
+                    "path": "<Keyboard>/e",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": true
                 }
             ]
         },
