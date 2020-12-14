@@ -7,6 +7,7 @@ TagManager:
   - enemy
   - mirror
   - block
+  - player
   layers:
   - Default
   - TransparentFX

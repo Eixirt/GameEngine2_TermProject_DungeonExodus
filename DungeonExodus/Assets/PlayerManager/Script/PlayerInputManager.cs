@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 using UnityEngine.VFX;
+using Image = UnityEngine.UI.Image;
 
 namespace Assets.PlayerManager.Script
 {
@@ -10,7 +11,8 @@ namespace Assets.PlayerManager.Script
     {
         private PlayerInput _playerInput;
         private Vector2 _inputVector;
-        private CharacterController _characterController;
+        private Vector2 _inputRotateVector;
+        public CharacterController _characterController;
         private const float gravity = -9.8f;
         private float _jumpVelocity = 30.0f;
         [SerializeField] private float _fallingSpeed;
@@ -24,8 +26,11 @@ namespace Assets.PlayerManager.Script
         [SerializeField] private Animator _animator;
         [SerializeField] private Camera _camera;
         [SerializeField] private float wheelSpeed = 3000.0f;
-        [SerializeField] private VisualEffect magic;
         [SerializeField] private GameObject target;
+        [SerializeField] private GameObject magicEffect;
+        [SerializeField] private Image _aim;
+
+        public bool moveFlag = true;
         private void Awake() 
         {
             _characterController = GetComponent<CharacterController>();
@@ -52,64 +57,98 @@ namespace Assets.PlayerManager.Script
                 target = hit.collider.gameObject;
                 
                 //hit.transform.GetComponent<MeshRenderer>().material.color = Color.red; // 색 
-                Debug.DrawRay(ray.origin, ray.direction * 5f, Color.red, 5f);
+                //Debug.DrawRay(ray.origin, ray.direction * 5f, Color.red, 5f);
             }
             return target;
         
         }
+        
         void Update()
         {
-            float scroll = Input.GetAxis("Mouse ScrollWheel") * 1000f * Time.deltaTime;
-            //print("wheelSpeed : " + wheelSpeed + "mouseInput" + Input.GetAxis("Mouse ScrollWheel"));
+      
             _isGrounded = Physics.CheckSphere(groundCheckPosition.position, groundCheckRadius, groundLayer );
-            
+
             if (_isGrounded)
             {
                 _fallingSpeed = 0f;
             }
             if (_isJumping)
             {
-                if (_jumpVelocity <= 1.0f)
-                {
-                    _isJumping = false;
-                    _jumpVelocity = 30.0f;
-                }
-                _jumpVelocity = _jumpVelocity * _jumpAccel;
-                _fallingSpeed = Time.deltaTime * _jumpVelocity  + Time.deltaTime * gravity;
-               // print("jumping");
+                Jumping();
+                _animator.SetBool("isJump", true);
             }
             else
             {
                 _fallingSpeed = Time.deltaTime * gravity;
+                _animator.SetBool("isJump", false);
             }
-            var dir = transform.forward * _inputVector.y + transform.right * _inputVector.x;
-            _characterController.Move(dir  * Time.deltaTime * _charactorMoveSpeed);
-            _characterController.Move(new Vector3(0, _fallingSpeed, 0));
-            
-            
-           var picked = Picking();
+           MovePlayer(); 
+           GameObject picked = Picking();
            if (picked == null)
            {
-     
+                
            }
-           else if(picked.tag == "mirror")
+           else if (picked.tag == "mirror")
            {
-               magic.Play();
-               if (scroll != 0)
-               {
-                   _animator.Play("Attack02Start 0");
-                   picked.transform.Rotate(0, scroll, 0);
-                   print(scroll);
-               }
+               RotateTarget(picked);
+               _aim.color = Color.yellow;
            }
            else if (picked.tag == "block")
            {
-               magic.Play();
-               var moveDir = transform.forward*Time.deltaTime*5f;
-               moveDir.y = 0;
-               if(Input.GetMouseButton(0)) picked.transform.Translate(moveDir);
+               PushBlock(picked);
+               _aim.color = Color.yellow;
+           }
+           else
+           {
+               _aim.color = Color.gray;
            }
         }
+        
+
+        private void MovePlayer()
+        {
+            if (moveFlag)
+            {
+                var dir = transform.forward * _inputVector.y + transform.right * _inputVector.x;
+                _characterController.Move(dir * Time.deltaTime * _charactorMoveSpeed);
+                _characterController.Move(new Vector3(0, _fallingSpeed, 0));
+                if(dir.x == 0 && dir.y == 0)
+                    _animator.SetBool("isMove", false);
+            }
+        }
+
+        private void PushBlock(GameObject picked)
+        {
+            var moveDir = transform.forward * Time.deltaTime * 5f;
+            moveDir.y = 0;
+
+            if (Input.GetMouseButton(0))
+            {
+                picked.transform.Translate(moveDir);
+                _animator.SetBool("isAttack", true);
+                magicEffect.SetActive(true);
+            }
+            else
+            {
+                _animator.SetBool("isAttack", false);
+                magicEffect.SetActive(false);
+            }
+            magicEffect.transform.LookAt(target.transform);
+            magicEffect.transform.Rotate(new Vector3(0,-90,0));
+        }
+
+        private void Jumping()
+        {
+            if (_jumpVelocity <= 1.0f)
+            {
+                _isJumping = false;
+                _jumpVelocity = 30.0f;
+            }
+
+            _jumpVelocity = _jumpVelocity * _jumpAccel;
+            _fallingSpeed = Time.deltaTime * _jumpVelocity + Time.deltaTime * gravity;
+        }
+
         private void OnDisable()
         {
           _playerInput.Disable();
@@ -117,28 +156,37 @@ namespace Assets.PlayerManager.Script
         public void OnMove(InputAction.CallbackContext context)
         {
             _inputVector = context.ReadValue<Vector2>();
-            _animator.Play("BattleRunForward");
+            _animator.SetBool("isMove", true);
         }
         
-
         public void OnJump(InputAction.CallbackContext context)
         {
             _isGrounded = false;
             _isJumping = true;
-            _animator.Play("JumpStart");
         }
 
         public void OnRotate(InputAction.CallbackContext context)
         {
-            target = Picking();
-            var temp = context.ReadValue<Vector2>();
-            if (target.tag == "mirror")
-            {
-                _animator.Play("Attack02Start 0");
-                target.transform.Rotate(0, temp.x * Time.deltaTime * 100f, 0);
-            }
+            _inputRotateVector = context.ReadValue<Vector2>();
         }
 
-        // print(scroll);
+        private void RotateTarget(GameObject target)
+        { 
+          if (_inputRotateVector.x == 0 && _inputRotateVector.y == 0)
+          {
+              _animator.SetBool("isAttack", false);
+              magicEffect.SetActive(false);
+          }
+          else
+          {
+              _animator.SetBool("isAttack", true);
+              magicEffect.SetActive(true);
+          }; 
+          target.transform.Rotate(0, _inputRotateVector.x * Time.deltaTime * 100f, 0);
+          
+          // operation base offset rotate
+          magicEffect.transform.LookAt(target.transform);
+          magicEffect.transform.Rotate(new Vector3(0,-90,0));
+        }
     }
 }
