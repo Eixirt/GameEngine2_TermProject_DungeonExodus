@@ -6,6 +6,7 @@ TagManager:
   tags:
   - enemy
   - mirror
+  - block
   layers:
   - Default
   - TransparentFX
