@@ -75,7 +75,7 @@ namespace Assets.PlayerManager.Script
         public void OnMove(InputAction.CallbackContext context)
         {
             _inputVector = context.ReadValue<Vector2>();
-            print(_inputVector);
+           //print(_inputVector);
         }
 
         public void OnMouse(InputAction.CallbackContext context)
