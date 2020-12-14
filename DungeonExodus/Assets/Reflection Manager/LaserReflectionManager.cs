@@ -9,11 +9,12 @@ namespace Reflection_Manager
     {
         Red_Laser,
         White_Laser,
-        Reflected_Laser,
+        Blue_Laser,
     }
 
     public class LaserReflectionManager : MonoBehaviour
     {
+        public bool isReflected = false;
         public LaserType laserColor;
         public ParticleSystem part;
         public List<ParticleCollisionEvent> collisionEvents;
@@ -22,13 +23,19 @@ namespace Reflection_Manager
         void Awake()
         {
             part = GetComponent<ParticleSystem>();
-            collisionEvents = new List<ParticleCollisionEvent>();
+            if(collisionEvents == null)
+                collisionEvents = new List<ParticleCollisionEvent>();
         }
 
         private void OnParticleCollision(GameObject other)
         {
-            if (laserColor == LaserType.Reflected_Laser)
+            if (isReflected)
                 return;
+
+            if (collisionEvents == null)
+            {
+                collisionEvents = new List<ParticleCollisionEvent>();
+            }
             
             int numCollisionEvents = part.GetCollisionEvents(other, collisionEvents);
             Rigidbody rb = other.GetComponent<Rigidbody>();
@@ -37,30 +44,22 @@ namespace Reflection_Manager
             {
                 if (rb) 
                 {
+                    //Debug.Log(other.gameObject + " " + other.tag);
                     switch (other.tag)
                     {
-                        case "mirror":
+                        case "mirror_monitor":
                         {
-                            MirrorReflectionManager m = other.transform.Find("Monitor")
-                                .GetComponent<MirrorReflectionManager>();
+                            //MirrorReflectionManager m = other.transform.Find("Monitor").GetComponent<MirrorReflectionManager>();
+                            MirrorReflectionManager m = other.transform.parent.GetComponent<MirrorReflectionManager>();
                             
-                            Vector3 collisionPos = collisionEvents[i].intersection;
-
-                            RaycastHit hit;
-                            Physics.Raycast(transform.position, transform.right, out hit);
-                            Debug.DrawRay(transform.position, transform.right * hit.distance, Color.red);
-
-                            m.CallCollisionWithLaser(hit.point, transform.localPosition, laserColor);
+                            //Debug.DrawRay(transform.position, transform.right * 55f, Color.red, 1f);
+                            //Debug.Log("hit: " + hit.transform.gameObject + " " + laserColor);
                             
-                            Vector3 mirrorCameraDirection = other.transform.Find("Monitor").Find("Camera").GetComponent<Camera>().transform.rotation * Vector3.right;
-
-                            var go = this.gameObject;
-                            // GameObject reflectLaserObject = Instantiate(go, collisionPos, Quaternion.LookRotation(mirrorCameraDirection), other.transform);
-                            //reflectLaserObject.transform.localScale = new Vector3(10, 3, 3);
-                            //Destroy(reflectLaserObject, 0.1f);
+                            //m.CallCollisionWithLaser(hit.point, transform.localPosition, laserColor);
+                            m.CallCollisionWithLaser(collisionEvents[i].intersection, transform.position, laserColor);
                         }
                             break;
-                        case "Untagged":
+                        case "block":
                         {
                             //Vector3 force = collisionEvents[i].velocity * 10;
                         

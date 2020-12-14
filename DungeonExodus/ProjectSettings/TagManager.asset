@@ -8,6 +8,7 @@ TagManager:
   - mirror
   - block
   - player
+  - mirror_monitor
   layers:
   - Default
   - TransparentFX

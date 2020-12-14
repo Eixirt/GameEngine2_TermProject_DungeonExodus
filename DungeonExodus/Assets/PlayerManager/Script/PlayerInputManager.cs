@@ -133,7 +133,7 @@ namespace Assets.PlayerManager.Script
                 _animator.SetBool("isAttack", false);
                 magicEffect.SetActive(false);
             }
-            magicEffect.transform.LookAt(target.transform);
+            magicEffect.transform.LookAt(picked.transform);
             magicEffect.transform.Rotate(new Vector3(0,-90,0));
         }
 
@@ -181,9 +181,12 @@ namespace Assets.PlayerManager.Script
           {
               _animator.SetBool("isAttack", true);
               magicEffect.SetActive(true);
-          }; 
-          target.transform.Rotate(0, _inputRotateVector.x * Time.deltaTime * 100f, 0);
-          
+          };
+          if (target.CompareTag("mirror"))
+          {
+              target.transform.Find("Monitor").Rotate(0, _inputRotateVector.x * Time.deltaTime * 100f, 0);
+          }
+
           // operation base offset rotate
           magicEffect.transform.LookAt(target.transform);
           magicEffect.transform.Rotate(new Vector3(0,-90,0));
