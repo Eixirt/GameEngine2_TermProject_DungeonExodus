@@ -30,6 +30,7 @@ namespace Assets.PlayerManager.Script
         [SerializeField] private GameObject magicEffect;
         [SerializeField] private Image _aim;
 
+        
         public bool moveFlag = true;
         private void Awake() 
         {
@@ -181,12 +182,9 @@ namespace Assets.PlayerManager.Script
           {
               _animator.SetBool("isAttack", true);
               magicEffect.SetActive(true);
-          };
-          if (target.CompareTag("mirror"))
-          {
-              target.transform.Find("Monitor").Rotate(0, _inputRotateVector.x * Time.deltaTime * 100f, 0);
-          }
-
+          }; 
+          target.transform.Rotate(0, _inputRotateVector.x * Time.deltaTime * 100f, 0);
+          
           // operation base offset rotate
           magicEffect.transform.LookAt(target.transform);
           magicEffect.transform.Rotate(new Vector3(0,-90,0));
