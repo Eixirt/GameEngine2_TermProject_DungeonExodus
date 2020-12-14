@@ -12,7 +12,7 @@ namespace Assets.PlayerManager.Script
         private PlayerInput _playerInput;
         private Vector2 _inputVector;
         private Vector2 _inputRotateVector;
-        private CharacterController _characterController;
+        public CharacterController _characterController;
         private const float gravity = -9.8f;
         private float _jumpVelocity = 30.0f;
         [SerializeField] private float _fallingSpeed;
@@ -29,6 +29,8 @@ namespace Assets.PlayerManager.Script
         [SerializeField] private GameObject target;
         [SerializeField] private GameObject magicEffect;
         [SerializeField] private Image _aim;
+
+        public bool moveFlag = true;
         private void Awake() 
         {
             _characterController = GetComponent<CharacterController>();
@@ -55,7 +57,7 @@ namespace Assets.PlayerManager.Script
                 target = hit.collider.gameObject;
                 
                 //hit.transform.GetComponent<MeshRenderer>().material.color = Color.red; // 색 
-                Debug.DrawRay(ray.origin, ray.direction * 5f, Color.red, 5f);
+                //Debug.DrawRay(ray.origin, ray.direction * 5f, Color.red, 5f);
             }
             return target;
         
@@ -105,11 +107,14 @@ namespace Assets.PlayerManager.Script
 
         private void MovePlayer()
         {
-            var dir = transform.forward * _inputVector.y + transform.right * _inputVector.x;
-            _characterController.Move(dir * Time.deltaTime * _charactorMoveSpeed);
-            _characterController.Move(new Vector3(0, _fallingSpeed, 0));
-            if(dir.x == 0 && dir.y == 0)
-                _animator.SetBool("isMove", false);
+            if (moveFlag)
+            {
+                var dir = transform.forward * _inputVector.y + transform.right * _inputVector.x;
+                _characterController.Move(dir * Time.deltaTime * _charactorMoveSpeed);
+                _characterController.Move(new Vector3(0, _fallingSpeed, 0));
+                if(dir.x == 0 && dir.y == 0)
+                    _animator.SetBool("isMove", false);
+            }
         }
 
         private void PushBlock(GameObject picked)
